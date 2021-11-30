@@ -1,7 +1,8 @@
-import os, requests
+import os, requests, meraki, json
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
-import logging
+
+
 # SOCKET MODE SETUP
 
 app = App(
@@ -14,60 +15,76 @@ app = App(
 #     signing_secret=os.environ.get("SLACK_SIGNIN_SECRET")
 # )
 
+
+def get_device_by_serial(networkId, serial='Q2MD-BHHS-5FDL'):
+    headers = {
+        'Content-Type':'application/json',
+        'Accept':'application/json',
+        'X-Cisco-Meraki-API-Key':'6bec40cf957de430a6f1f2baa056b99a4fac9ea0'
+    }
+    organizations = requests.get(f'{MERAKI_API_URL}/organizations', headers=headers)
+    if organizations.status_code == '200':
+
+        meraki_response = requests.get(f'{MERAKI_API_URL}/networks/{networkId}/devices/{serial}', headers)
+    print(meraki_response)
+
+
 @app.event("app_home_opened")
 def update_home_tab(client, event, logger):
-  try:
-    logger.info("Updating home tab")
-    # views.publish is the method that your app uses to push a view to the Home tab
-    client.views_publish(
-      # the user that opened your app's app home
-      user_id=event["user"],
-      # the view object that appears in the app home
-      view={
-        "type": "home",
-        "callback_id": "home_view",
+    try:
+        logger.info("Updating home tab")
+        # views.publish is the method that your app uses to push a view to the Home tab
+        client.views_publish(
+            # the user that opened your app's app home
+            user_id=event["user"],
+            # the view object that appears in the app home
+            view={
+                "type": "home",
+                "callback_id": "home_view",
 
-        # body of the view
-        "blocks": [
-          {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": "*Welcome to your _App's Home_* :tada:"
+                # body of the view
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Welcome to your _App's Home_* :tada:"
+                        }
+                    },
+                    {
+                        "type": "divider"
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "This button won't do much for now but you can set up a listener for it using the `actions()` method and passing its unique `action_id`. See an example in the `examples` folder within your Bolt app."
+                        }
+                    },
+                    {
+                        "type": "actions",
+                        "elements": [
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Click me!"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
-          },
-          {
-            "type": "divider"
-          },
-          {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": "This button won't do much for now but you can set up a listener for it using the `actions()` method and passing its unique `action_id`. See an example in the `examples` folder within your Bolt app."
-            }
-          },
-          {
-            "type": "actions",
-            "elements": [
-              {
-                "type": "button",
-                "text": {
-                  "type": "plain_text",
-                  "text": "Click me!"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    )
-  
-  except Exception as e:
-    logger.error(f"Error publishing home tab: {e}")
+        )
+
+    except Exception as e:
+        logger.error(f"Error publishing home tab: {e}")
+
 
 @app.message("hello")
 def message_hello(message, say):
     say(f"Hey there <@{message['user']}>!")
+
 
 if __name__ == "__main__":
     # SOCKET MODE
