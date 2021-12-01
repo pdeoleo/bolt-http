@@ -9,24 +9,46 @@ app = App(
     token=os.environ.get("SLACK_BOT_TOKEN")
 )
 
-# STANDARD HTTP SETUP
+# HTTP SETUP
 # app = App(
 #     token=os.environ.get("SLACK_BOT_TOKEN"),
 #     signing_secret=os.environ.get("SLACK_SIGNIN_SECRET")
 # )
 
+@app.command("/organizations")
+def cmd_organizations(ack, respond, command):
+    ack()
 
-def get_device_by_serial(networkId, serial='Q2MD-BHHS-5FDL'):
-    headers = {
-        'Content-Type':'application/json',
-        'Accept':'application/json',
-        'X-Cisco-Meraki-API-Key':'6bec40cf957de430a6f1f2baa056b99a4fac9ea0'
-    }
-    organizations = requests.get(f'{MERAKI_API_URL}/organizations', headers=headers)
-    if organizations.status_code == '200':
+    dashboard = meraki.DashboardAPI(os.environ.get('MERAKI_DASHBOARD_API_KEY'))
+    user_orgs = dashboard.organizations.getOrganizations(perPage=5)
+    msg = ''
+    for orgs in user_orgs:
+        msg += orgs['name'] +'\n'
+    
+    respond(msg)
+    
 
-        meraki_response = requests.get(f'{MERAKI_API_URL}/networks/{networkId}/devices/{serial}', headers)
-    print(meraki_response)
+@app.message("organizations")
+def message_organizations(message, say):
+    # Load organizations for APP home page
+
+    dashboard = meraki.DashboardAPI(os.environ.get('MERAKI_DASHBOARD_API_KEY'))
+    user_orgs = dashboard.organizations.getOrganizations(perPage=5)
+
+    for i, org in enumerate(user_orgs):
+        user_orgs[i]['networks'] = dashboard.organizations.getOrganizationNetworks(org['id'])
+    
+    msg = ''
+    for org in user_orgs:
+        msg += f"{org['name']}\n"
+        for network in org['networks']:
+            msg += f"-{network['name']}\n"
+
+    say(msg)
+
+    # with meraki.DashboardAPI(os.environ.get('MERAKI_DASHBOARD_API_KEY')) as dashboard:
+    #     # meraki_dashboard.
+    #     pass
 
 
 @app.event("app_home_opened")
