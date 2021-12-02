@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "channel": "D02NW3L92AW",
+  "ts": "1638476626.000800",
+  "message": {
+    "bot_id": "B02NFE4T079",
+    "type": "message",
+    "text": "Loading...",
+    "user": "U02PKQS8CGY",
+    "ts": "1638476626.000800",
+    "team": "T02P42B0HHP",
+    "bot_profile": {
+      "id": "B02NFE4T079",
+      "app_id": "A02NYAGNZUL",
+      "name": "Bolt",
+      "icons": {
+        "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+        "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+        "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+      },
+      "deleted": false,
+      "updated": 1638197760,
+      "team_id": "T02P42B0HHP"
+    }
+  }
+}
